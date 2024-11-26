@@ -1,11 +1,25 @@
-name: first workflow
-on: workflow_dispatch
-jobs: 
-   first-job:
-       runs-on: ubuntu-latest
-       steps:
-          - name: Print greetings
-            run: echo "hello there!"
-          - name: Asking about work
-            run: echo "Did you complete the work?"
-            
+name: Pass Artifact between Runners
+on: push
+jobs:
+  job1:
+    runs-on: windows-latest
+    steps:
+    - name: Generate artifact
+      run: |
+        echo "Hello from Windows" > artifact.txt
+      uses: actions/upload-artifact@v3
+      with:
+        name: my-artifact
+        path: artifact.txt
+
+  job2:
+    needs: job1
+    runs-on: ubuntu-latest
+    steps:
+    - name: Download artifact
+      uses: actions/download-artifact@v3
+      with:
+        name: my-artifact
+    - name: Print artifact contents
+      run: |
+        cat my-artifact/artifact.txt
